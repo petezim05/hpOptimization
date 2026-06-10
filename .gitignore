@@ -1,0 +1,8 @@
+evolutionary/
+evLossGraphs/
+data/
+losses.csv
+results.txt
+checkpoints/
+__pycache__/
+*.pyc
