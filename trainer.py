@@ -9,18 +9,21 @@ import torch.nn.functional as F
 import numpy as np
 import net
 
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
 LR = 1e-3
-EPOCHS = 5000
+EPOCHS = 2000
 BATCH_SIZE = 64
+
 def train(params: list[int]) -> list[float]:
-    model = net.build(params)()
+    model = net.build(params)().to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=LR)
 
     losses = []
 
     for _ in range(EPOCHS):
-        x = torch.FloatTensor(BATCH_SIZE, 1).uniform_(-2 * np.pi, 2 * np.pi)
-        y = torch.FloatTensor(np.sin(x.numpy()))
+        x = torch.FloatTensor(BATCH_SIZE, 1).uniform_(-2 * np.pi, 2 * np.pi).to(device)
+        y = torch.sin(x)
 
         pred = model(x)
         loss = F.mse_loss(pred, y)

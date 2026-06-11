@@ -9,6 +9,8 @@ import numpy
 import math
 from tokenizer import ArchTokenizer
 
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
 LOSSES_CSV = "losses.csv"
 
 def append_run_to_csv(losses: list[float], params: list[int]) -> None:
@@ -91,7 +93,7 @@ class AutoregressiveModelBuilder(torch.nn.Module):
         log_probs = []
 
         for pos in range(seq_len):
-            x = torch.FloatTensor(sequence)
+            x = torch.FloatTensor(sequence).to(device)
             logits = self.forward(x)
             if self.temperature == 0:
                 idx = torch.argmax(logits)
@@ -109,8 +111,8 @@ class AutoregressiveModelBuilder(torch.nn.Module):
 
 #the bandit finally arrives
 #bias eos initially to ensure valid models are produced
-hermes = AutoregressiveModelBuilder(seq_len)
-hermes.layers[-1].bias.data[EOS - 1] = 3.0 
+hermes = AutoregressiveModelBuilder(seq_len).to(device)
+hermes.layers[-1].bias.data[EOS - 1] = 3.0
 
 LR = 1e-3
 EPISODES = 5000
@@ -170,7 +172,7 @@ def trainAgent(verbose=False):
         if not gains:
             continue
 
-        gains_t = torch.tensor(gains, dtype=torch.float32)
+        gains_t = torch.tensor(gains, dtype=torch.float32).to(device)
         if len(gains_t) > 1 and gains_t.std() > 0:
             gains_t = (gains_t - gains_t.mean()) / (gains_t.std() + 1e-8)
 
