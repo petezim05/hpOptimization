@@ -169,6 +169,9 @@ def trainAgent(verbose=False):
         if states:
             prevState = float(numpy.mean(states))
 
+        if (episode + 1) % CHECKPOINT_INTERVAL == 0:
+            torch.save(hermes.state_dict(), os.path.join(CHECKPOINT_DIR, f"hermes_ep{episode + 1}.pt"))
+
         if not gains:
             continue
 
@@ -179,9 +182,6 @@ def trainAgent(verbose=False):
         optimizer.zero_grad()
         torch.stack([-lp * g for lp, g in zip(log_prob_sums, gains_t)]).mean().backward()
         optimizer.step()
-
-        if (episode + 1) % CHECKPOINT_INTERVAL == 0:
-            torch.save(hermes.state_dict(), os.path.join(CHECKPOINT_DIR, f"hermes_ep{episode + 1}.pt"))
 
         if verbose:
             arch = "1 -> " + " -> ".join(str(w) for w in best[1]) + " -> 1"
