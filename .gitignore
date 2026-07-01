@@ -6,3 +6,4 @@ results.txt
 checkpoints/
 __pycache__/
 *.pyc
+legacy/
